@@ -37,23 +37,63 @@ I work in a customer service role handling password resets, MFA, and IAM support
 - [ Add: DNS configuration details ]
 - [ Add: any Group Policy Objects (GPOs) configured ]
 
+## PowerShell Automation
+As a next step beyond GUI-based administration, I used the Active Directory PowerShell module to query and manage objects directly from the command line.
+
+**Commands used:**
+```powershell
+# Confirm the AD module is available
+Get-Module -ListAvailable ActiveDirectory
+
+# Look up an existing user by SamAccountName
+Get-ADUser -Identity "tuser" -Properties *
+
+# List current members of a security group
+Get-ADGroupMember -Identity "Help-Desk-Team"
+
+# Create a new user account via PowerShell (instead of the GUI)
+New-ADUser -Name "PS Test User" -SamAccountName "pstestuser" -Path "OU=IT-Staff,DC=ayanna,DC=local" -Enabled $true -AccountPassword (Read-Host -AsSecureString "Enter Password")
+
+# Add the new user to a security group
+Add-ADGroupMember -Identity "Help-Desk-Team" -Members "pstestuser"
+
+# Verify group membership
+Get-ADGroupMember -Identity "Help-Desk-Team"
+```
+
+**Result:** Successfully created a new user (`pstestuser`) in the `IT-Staff` OU and added it to the `Help-Desk-Team` security group entirely through PowerShell, then verified both `tuser` and `pstestuser` as members of the group.
+
+**Troubleshooting note:** Initially used the display name `"Test User"` with `Get-ADUser -Identity`, which returned an "object not found" error. Resolved by querying with a wildcard filter (`Get-ADUser -Filter "Name -like 'Test*'"`) to find the actual `SamAccountName` (`tuser`), since `-Identity` requires the SamAccountName rather than the display name.
+
+**Screenshots:**
+![Object not found error using display name](screenshots/powershell-error-objectnotfound.png)
+*Initial error when using the display name instead of SamAccountName*
+
+![New-ADUser command creating pstestuser](screenshots/powershell-newaduser.png)
+*Creating a new user account via PowerShell*
+
+![Get-ADGroupMember showing both users](screenshots/powershell-groupmember.png)
+*Verifying both tuser and pstestuser as members of Help-Desk-Team*
+
 ## Troubleshooting & Lessons Learned
 - Initially attempted to install **Windows Server 2025 (Evaluation)**, but ran into a license validation failure preventing setup from completing.
 - Resolved by falling back to **Windows Server 2022 (Evaluation)**, which installed and licensed successfully, allowing the project to proceed.
-- *(This is a good example of real-world troubleshooting — documenting it shows problem-solving, not just a finished result.)*
+- `Get-ADUser -Identity` requires the account's `SamAccountName`, not its display name — learned this after an "object not found" error and resolved it using a wildcard `-Filter` search.
+- *(These are good examples of real-world troubleshooting — documenting them shows problem-solving, not just a finished result.)*
 
 ## Skills Demonstrated
 - Virtualization and VM management (UTM)
 - Windows Server installation and licensing troubleshooting
 - Active Directory Domain Services setup
 - Identity and Access Management (IAM) fundamentals
+- PowerShell scripting for AD administration (user/group creation and management)
 - Foundational knowledge aligned with CompTIA Network+ and Security+ objectives
 
 ## Next Steps
 - Add client VMs and join them to the domain
-- Create Organizational Units (OUs), user accounts, and security groups
+- Expand OU structure, user accounts, and security groups
 - Configure Group Policy Objects (GPOs) for security hardening
-- Automate user/group creation using PowerShell (`New-ADUser`, `New-ADGroup`, etc.)
+- Continue building out PowerShell scripts for bulk user/group management
 - Add screenshots of AD Users and Computers, Group Policy Management, and successful domain login
 
 ## Screenshots
